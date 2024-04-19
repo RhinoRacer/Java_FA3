@@ -1,0 +1,10 @@
+1;Classical Mythology;Mark P. O. Morford;195153448;500.0;1C;Oxford University Press;false
+2;Clara Callan;Richard Bruce Wright;2005018;500.0;1C;HarperFlamingo Canada;true
+3;Decision in Normandy;Carlo D'Este;60973129;500.0;3D;HarperPerennial;false
+4;PLEADING GUILTY;Scott Turow;671870432;370.0;12S;Audioworks;true
+5;Nights Below Station Street;David Adams Richards;771074670;240.0;19Y;Emblem Editions;true
+6;Jane Doe;R. J. Kaiser;1552041778;370.0;36I;Mira Books;false
+7;Tage der Unschuld.;Richard North Patterson;3442446937;50.0;20R;Goldmann;true
+8;The Testament;John Grisham;440234743;250.0;43P;Dell;true
+9;Wild Animus;Rich Shapero;971880107;240.0;7O;Too Far;true
+10;Airframe;Michael Crichton;345402871;24.0;50Q;Ballantine Books;true

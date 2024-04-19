@@ -1,0 +1,10 @@
+1;Pieter;van Staden;pieterryno@gmail.com;2004/07/17;Male
+2;Bruce;Vorster;brucevorster007@gmail.com;2003/05/05;Male
+3;Deline;Jacobs;delinejacobs007@gmail.com;2004/05/05;Female
+4;Tristan;Vlok;tristanvlok@gmail.com;06/03/2004;Male
+5;Vanessa;Baasden;vanessa@gmail.com;15/05/1996;Female
+6;Leonie;van Staden];Leonie@gmail.com;30/12/1967;Female
+7;Pieter Francois;van Staden;vstadepf@telkomsa.net;14/04/1968;Male
+8;Gerhard;Baasden;gerhardb@gmail.com;13/04/1996;Male
+9;Andre;Smit;andresmit@gmail.com;24/02/2004;Male
+10;Elze;Vermaak;elzevermaak@gmail.com;26/09/2004;Female
