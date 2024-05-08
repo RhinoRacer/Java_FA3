@@ -1,4 +1,0 @@
-
-1;3;Decision in Normandy;1;14
-2;1;Classical Mythology;5;14
-3;6;Jane Doe;11;14

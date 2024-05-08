@@ -1,4 +1,3 @@
 1;3;Decision in Normandy;2024-04-19;2024-04-24;1;Pieter
 2;1;Classical Mythology;2024-04-19;2024-04-24;5;Vanessa
 3;6;Jane Doe;2024-04-19;2024-04-24;11;Lusukama
-4;9;Wild Animus;2024-05-07;2024-05-12;9;Andre
