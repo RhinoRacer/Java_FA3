@@ -1,4 +1,4 @@
-package formative2;
+package formative3;
 import java.io.BufferedReader; // Import buffered reader to read file
 import java.io.BufferedWriter; // Import buffered reader to write file
 import java.util.*;
@@ -8,19 +8,41 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher; // Import to use regualar expression
 import java.util.regex.Pattern;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.List;
 /**
  * @author piete
  */
 // ============================================ START ============================================
-public class Formative2 {
+public class Formative3 {
+    public static BackgroundTaskRunner backgroundTaskRunner; // initialize outside a void method so I can close it later outside the main method
     public static void main(String[] args) {
         ArrayList<String> Books = new ArrayList<String>();//creating books array
         ArrayList<String> Members = new ArrayList<String>();//creating members array
+        
+        // --------------- FORMATIVE 3 Task 2 ---------------
+        // Create NotificationTaskRunner
+        NotificationTaskRunner notificationTaskRunner = new NotificationTaskRunner();
+        // Create BackgroundTaskRunner and pass the NotificationTaskRunner
+        backgroundTaskRunner = new BackgroundTaskRunner(notificationTaskRunner);
+        // Start the background task runner
+        backgroundTaskRunner.run();
+        // Wait for Thread to finish its processes so the Main Menu Displays correctly and doesn't confuse user.
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // --------------- FORMATIVE 3 Task 2 ---------------
+        
         //creating Books Object
         try {
-            File myObj = new File("src/formative2/Books.txt");
+            File myObj = new File("src/formative3/Books.txt");
             Scanner myReader = new Scanner(myObj);
         while (myReader.hasNextLine()) {
             String data = myReader.nextLine();
@@ -34,7 +56,7 @@ public class Formative2 {
         }
         //creating Members Object
         try {
-            File myObj = new File("src/formative2/Members.txt");
+            File myObj = new File("src/formative3/Members.txt");
             Scanner myReader = new Scanner(myObj);
         while (myReader.hasNextLine()) {
             String data = myReader.nextLine();
@@ -46,6 +68,11 @@ public class Formative2 {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+        finally {
+            play(args);
+        }
+    }
+    public static void play(String[] args) {
         // Creating menu for start
         Scanner user_input = new Scanner(System.in);
         System.out.println(" ============== Welcome to Library Management System ============== \n"
@@ -59,20 +86,23 @@ public class Formative2 {
                 + " 7. Display all members\n"
                 + " 8. Return book\n"
                 + " 9. Display Borrowed History\n"
+                + " 10. checking due dates\n"
+                + " 11. viewing fines\n"
+                + " 12. managing notifications\n"
                 + " 99. Quit");
         String choice = user_input.nextLine();
         // ================= Display All Book =================
         if (choice.equals("1")){
             Display_Books(); //calls display books method
-            main(args);
+            play(args);
         // ================= Add Book =================
         } else if (choice.equals("2")) {
             Add_Book(); //calls add_book method
-            main(args);
+            play(args);
         // ================= Add new Member =================
         } else if (choice.equals("3")) {
             Add_Member(); //calls add_member method
-            main(args);
+            play(args);
         // ================= Search Book =================
         } else if (choice.equals("4")) {
             System.out.println("Enter your search method: \n"
@@ -85,10 +115,10 @@ public class Formative2 {
                     System.out.println("Enter Book ID : ");
                     int ID = user_input.nextInt();
                     searchByID(ID); //calls search by id method
-                    main(args);
+                    play(args);
                 } catch (NumberFormatException e) {
                     System.out.println(ErrorList.Error2()); //custom error message for better user experience
-                    main(args); 
+                    play(args); 
                 } catch (Exception e) {
                     System.out.println("An error occurred.");
                     e.printStackTrace();
@@ -99,17 +129,17 @@ public class Formative2 {
                     System.out.println("Enter Book Title : ");
                     String title = user_input.nextLine();
                     searchByTitle(title); // calling search by title method
-                    main(args);
+                    play(args);
                 } catch (Exception e) {
                     System.out.println("An error occurred.");
                     e.printStackTrace();
-                    main(args);
+                    play(args);
                 }
             } else {
                 System.out.println(ErrorList.Error1());
-                main(args);
+                play(args);
             }
-            main(args);
+            play(args);
         // ================= Book Checkout =================
         } else if (choice.equals("5")) {
             try {
@@ -118,14 +148,14 @@ public class Formative2 {
                 System.out.println("Enter/Scan the Member ID Card of the customer: ");
                 int MemberID = user_input.nextInt();
                 Checkout(BookID,MemberID); //calls checkout method
-            main(args);
+            play(args);
             } catch (NumberFormatException e) {
                 System.out.println(ErrorList.Error2()); //custom error message for better user experience
-                main(args); 
+                play(args); 
             } catch (Exception e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
-                main(args);
+                play(args);
             }
         // ================= Remove Member =================
         } else if (choice.equals("6")) {
@@ -134,23 +164,23 @@ public class Formative2 {
                 String ID_string = user_input.nextLine();
                 if (ID_string.isBlank() || ID_string.isEmpty()) {
                     System.out.println(ErrorList.Error3()); //custom error message for better user experience
-                    main(args);
+                    play(args);
                 }
                 int ID = Integer.parseInt(ID_string);
                 Delete_Member(ID); // calls delete member method
-                main(args);
+                play(args);
             } catch (NumberFormatException e) {
                 System.out.println(ErrorList.Error2()); //custom error message for better user experience
-                main(args);
+                play(args);
             } catch (Exception e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
-                main(args);
+                play(args);
             }
         // ================= Display All Members =================    
         } else if (choice.equals("7")) {
             Display_Members(); //calls display all members method
-            main(args);
+            play(args);
         // ================= Return a book =================    
         } else if (choice.equals("8")) {
             try {
@@ -159,32 +189,116 @@ public class Formative2 {
                 System.out.println("Enter/Scan the Member ID Card of the customer returning a book: ");
                 int MemberID = user_input.nextInt();
                 ReturnBook(BookID,MemberID); // calls return book method to return previously checked out book
-                main(args);
+                play(args);
             } catch (NumberFormatException e) {
                 System.out.println(ErrorList.Error2()); //custom error message for better user experience
-                main(args); 
+                play(args); 
             } catch (Exception e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
-                main(args);
+                play(args);
             }
         // ================= Display Borrowed Book history =================    
         } else if (choice.equals("9")) {
             Borrowed_Books(); //calls display borrowed books method
-            main(args);
+            play(args);
+            // --------------- FORMATIVE 3 Task 4 --------------- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        } else if (choice.equals("10")) {
+            Check_Due_Dates();
+            play(args);
+        } else if (choice.equals("11")) {
+            View_Fines();
+            play(args);
+        } else if (choice.equals("12")) {
+            Manage_Notifications();
+            play(args);
+            // --------------- FORMATIVE 3 Task 4 --------------- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // ================= Quit Application =================
         } else if (choice.equals("99")) {
+            // Stop the background task runner
+            backgroundTaskRunner.stop();
             Quit(); //calls quit method
         } else {
             System.out.println(ErrorList.Error1());
-            main(args);
+            play(args);
         }
     }
+    
+    // --------------- FORMATIVE 3 Task 4 --------------- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /*
+    10 checking due dates\n"
+    11. viewing fines\n"
+    12. managing notifications
+    */
+    public static void Check_Due_Dates() {
+        try {
+            System.out.println(" ========================== Fetching Report ====================================================");
+            File myObj = new File("src/formative3/Report.txt");
+            Scanner myReader = new Scanner(myObj);
+            BufferedReader br = new BufferedReader(new FileReader(myObj)); // creating a buffered reader
+            while (myReader.hasNextLine()) {
+                String line;
+                line = br.readLine(); // read report entry
+                System.out.println(line); // print report line/entry
+                myReader.nextLine();
+            }
+            System.out.println(" ========================== Going back to Menu ====================================================");
+            myReader.close();
+        } 
+        catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("An IO error occurred.");
+            e.printStackTrace();
+        }
+    }
+    
+    public static void View_Fines() {
+        final File myObj = new File("src/formative3/Notifications.txt");
+
+        try {
+            Scanner myReader = new Scanner(myObj);
+            String line;
+            BufferedReader br = new BufferedReader(new FileReader(myObj)); // creating a buffered reader
+            System.out.println(" ========================== Fetching Overdue Books ====================================================");
+            while (myReader.hasNextLine()) {
+                line = br.readLine();
+                if (line == null) { // even with .hasnextline returning false the loop continues, so I force close it if the line is null
+                    myReader.close(); // I close the reader after line being confirmed null
+                    System.out.println(" ========================== Going back to Menu ====================================================");
+                    play(null);
+                } else if (line.isBlank()) {
+                    myReader.nextLine();
+                    line = br.readLine();
+                }
+                String[] notification = line.split(";");
+                int memberID = Integer.parseInt(notification[3]); // get member ID
+                String bookTitle = notification[2]; // get book title
+                int daysOverdue = Integer.parseInt(notification[4]); // get the amount of days overdue for calculation.
+
+                // Calculate fine
+                int fine = daysOverdue * 10;
+
+                // Display output
+                System.out.println("The user with Member ID " + memberID + "'s book '" + bookTitle +
+                                   "' is late by " + daysOverdue + " days and they need to pay R" + fine);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void Manage_Notifications() {
+        
+    }
+    
+    // --------------- FORMATIVE 3 Task 4 --------------- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // ============================================ Display Books ============================================
     public static void Display_Books() {
         //create Books Object
         try {
-            File myObj = new File("src/formative2/Books.txt");
+            File myObj = new File("src/formative3/Books.txt");
             Scanner myReader = new Scanner(myObj);
             BufferedReader br = new BufferedReader(new FileReader(myObj)); // creating a buffered reader
             System.out.println("Book ID \t Book Title \t Author \t ISBN number \t Price \t Shelf number \t Publisher \t is available"); //this helps with making the program presentable by using tab spaces and headings
@@ -231,7 +345,7 @@ public class Formative2 {
             //automatically true
             boolean is_available = true;
             //check how many books exist
-            File myObj = new File("src/formative2/Books.txt");
+            File myObj = new File("src/formative3/Books.txt");
             Scanner myReader = new Scanner(myObj);
             int i = 0;
             while (myReader.hasNextLine()) {
@@ -243,7 +357,7 @@ public class Formative2 {
             String New_Book = new_book.book(Book_ID, Title, Author, ISBN, Price, Shelf, Publisher, is_available);
             //set file path to Books.txt
             System.out.println("New book with ID: " + new_book.Book_ID + " created successfully");
-            String path = System.getProperty("user.dir") + "/src/formative2/Books.txt";
+            String path = System.getProperty("user.dir") + "/src/formative3/Books.txt";
             //append information to file
             FileWriter fw = new FileWriter(path, true);
             fw.write("\n" + New_Book);
@@ -291,7 +405,7 @@ public class Formative2 {
             System.out.println("Enter Gender (Male/Female): ");
             String Gender = user_input.nextLine();
             //check how many books exist
-            File myObj = new File("src/formative2/Members.txt");
+            File myObj = new File("src/formative3/Members.txt");
             Scanner myReader = new Scanner(myObj);
             int i = 0;
             while (myReader.hasNextLine()) {
@@ -304,17 +418,17 @@ public class Formative2 {
             String New_Member = new_member.Member(ID, Name, Surname, email, DOB, Gender);
             //set file path to Books.txt
             System.out.println("New member with ID: " + new_member.Member_ID + " added successfully");
-            String path = System.getProperty("user.dir") + "/src/formative2/Members.txt";
+            String path = System.getProperty("user.dir") + "/src/formative3/Members.txt";
             //append information to file
             FileWriter fw = new FileWriter(path, true);
             fw.write("\n" + New_Member);
             fw.close();
-            main(null);
+            play(null);
         }//error handling
         catch(Exception e) {
             System.out.println("An error occurred: ");
             e.printStackTrace();
-            main(null);
+            play(null);
         }
     }
     
@@ -334,7 +448,7 @@ public class Formative2 {
     }
     // ============================================ SEARCH ============================================
     // search by ID
-    private static final String FILE_PATH = "src/formative2/Books.txt"; // stating the file path
+    private static final String FILE_PATH = "src/formative3/Books.txt"; // stating the file path
     public static void searchByID(int bookID) {
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
             String line;
@@ -379,9 +493,9 @@ public class Formative2 {
     // ============================================ CHECKOUT ============================================
     public static void Checkout(int bookID, int memberID) throws IOException {
         // Member and Borrowed and Books file paths
-        final String BOOKS_FILE = "src/formative2/Books.txt";
-        final String MEMBERS_FILE = "src/formative2/Members.txt";
-        final String BORROWED_BOOKS_FILE = "src/formative2/Borrowed_Books.txt";
+        final String BOOKS_FILE = "src/formative3/Books.txt";
+        final String MEMBERS_FILE = "src/formative3/Members.txt";
+        final String BORROWED_BOOKS_FILE = "src/formative3/Borrowed_Books.txt";
         try (BufferedReader membersReader = new BufferedReader(new FileReader(MEMBERS_FILE))) {
             String memberLine;
             String memberName = null;
@@ -409,7 +523,7 @@ public class Formative2 {
                 }
             }
             // Check book availability in Books.txt
-            try (BufferedReader br = new BufferedReader(new FileReader("src/formative2/Books.txt"))) {
+            try (BufferedReader br = new BufferedReader(new FileReader("src/formative3/Books.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -419,7 +533,7 @@ public class Formative2 {
                         book[7] = "false"; //make it false
                     } else { //otherwise, let user know the book is not available for checkout
                         System.out.println("Book with ID: " + book[0] + ", is not available right now, please try again later!");
-                        main(null);
+                        play(null);
                     }
                     // Create updated book object
                     int Book_ID = Integer.parseInt(book[0]);
@@ -463,7 +577,7 @@ public class Formative2 {
                     // Update Borrowed_Books.txt with new record
                     updateBorrowedBooksFile(Newrecord);
                     System.out.println("Book with ID " + bookID + " checked out successfully to " + memberName + ".");
-                    main(null);
+                    play(null);
                 }
              catch (IOException e) {
                 e.printStackTrace();
@@ -472,8 +586,8 @@ public class Formative2 {
     }
     // ============================================ RETURN BOOK ============================================
     public static void ReturnBook(int bookID, int memberID) throws IOException {
-        final String BORROWED_BOOKS_FILE = "src/formative2/Borrowed_Books.txt";// file path for borrowed_books.txt
-        BufferedReader buffered_Books_reader = new BufferedReader(new FileReader("src/formative2/Books.txt")); //buffer reader for books.txt
+        final String BORROWED_BOOKS_FILE = "src/formative3/Borrowed_Books.txt";// file path for borrowed_books.txt
+        BufferedReader buffered_Books_reader = new BufferedReader(new FileReader("src/formative3/Books.txt")); //buffer reader for books.txt
         BufferedReader br = new BufferedReader(new FileReader(BORROWED_BOOKS_FILE));
         try (BufferedReader borrowedReader = new BufferedReader(new FileReader(BORROWED_BOOKS_FILE))) {
             StringBuilder updatedContent = new StringBuilder();
@@ -542,7 +656,7 @@ public class Formative2 {
             // if the record is found
             if (found) {
                 // Write the updated content back to Books.txt
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/formative2/Books.txt"))) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/formative3/Books.txt"))) {
                     writer.write(sb.toString());
                 }// Write the updated content back to Borrowed_Books.txt
                 try (BufferedWriter writer2 = new BufferedWriter(new FileWriter(BORROWED_BOOKS_FILE))) {
@@ -561,7 +675,7 @@ public class Formative2 {
     // ===============================================  Update Borrowed_Books.txt ==================================================
     private static void updateBorrowedBooksFile(String newContent){
         try {
-            String path = System.getProperty("user.dir") + "/src/formative2/Borrowed_Books.txt";
+            String path = System.getProperty("user.dir") + "/src/formative3/Borrowed_Books.txt";
             //append information to file
             FileWriter fw = new FileWriter(path, true);
             fw.write("\n" + newContent);
@@ -574,7 +688,7 @@ public class Formative2 {
     }
     // ============================================ Delete Members ============================================
     public static void Delete_Member (int Member_ID) {
-        String filePath = "src/formative2/Members.txt";
+        String filePath = "src/formative3/Members.txt";
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             StringBuilder sb = new StringBuilder();
             String line;
@@ -609,7 +723,7 @@ public class Formative2 {
     // ============================================ Display Members ============================================
     public static void Display_Members() {
         try {
-            File myObj = new File("src/formative2/Members.txt");
+            File myObj = new File("src/formative3/Members.txt");
             Scanner myReader = new Scanner(myObj);
             BufferedReader br = new BufferedReader(new FileReader(myObj));
             System.out.println("Member ID \t Name \t Surname \t E-mail \t D.O.B \t Gender ");
@@ -633,7 +747,7 @@ public class Formative2 {
         // ============================================ Display Borrowed Books ============================================
     public static void Borrowed_Books() {
         try {
-            File myObj = new File("src/formative2/Borrowed_Books.txt");
+            File myObj = new File("src/formative3/Borrowed_Books.txt");
             Scanner myReader = new Scanner(myObj);
             BufferedReader br = new BufferedReader(new FileReader(myObj));
             System.out.println("Borrow ID \t Book ID \t Title \t Date Borrowed \t Return Date \t Member ID \t Member Name");
@@ -746,4 +860,161 @@ public class Formative2 {
             return "Error 303: Cannot leave this space empty, please try again!";
         }
     }
+    
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FORMATIVE 3 CONTINUATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // --------------- Task 2 ---------------
+
+    static class BackgroundTaskRunner implements Runnable {
+        @Override
+        public void run() {
+            // Code to examine borrowed books, update fines, and process overdue books
+            System.out.println("Finding overdue books.");
+            this.start();
+        }
+        
+        private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        private final NotificationTaskRunner notificationTaskRunner;
+
+        public BackgroundTaskRunner(NotificationTaskRunner notificationTaskRunner) {
+            this.notificationTaskRunner = notificationTaskRunner;
+        }
+
+        public void start() {
+            scheduler.scheduleAtFixedRate(() -> {
+                // Code to examine for due or overdue books and get a list of them
+                List<Book> overdueBooks = examineForOverdueBooks();
+                System.out.println("Found all Overdue Books.");
+                // Pass the list of overdue books to the notification task runner
+                notificationTaskRunner.processOverdueBooks(overdueBooks);
+            }, 0, 1, TimeUnit.HOURS); // Run the task once every hour.
+        }
+
+        private List<Book> examineForOverdueBooks() {
+            try {
+                // Code to query borrowed history and find overdue books
+                List<Book> overdue = new ArrayList<Book>();
+            
+            // ==================== find overdue books and send to notifications.txt ====================
+                System.out.println("Finding overdue books.");
+                File myObj = new File("src/formative3/Borrowed_Books.txt");
+                Scanner myReader = new Scanner(myObj);
+                BufferedReader br = new BufferedReader(new FileReader(myObj));
+                String path = System.getProperty("user.dir") + "/src/formative3/Report.txt";
+                FileWriter clearer = new FileWriter(path, false);
+                clearer.write("");
+                while (myReader.hasNextLine()) {// if the reader has a next line, then the loop continues
+                    String line;
+                    line = br.readLine(); //read the current line
+                    String[] history = line.split(";");//split line into parts to neatly display it after
+                    String Due_date_str = history[4];
+                    LocalDate Due_date = LocalDate.parse(Due_date_str); // get due date
+                    LocalDate Current_date = LocalDate.now(); // get current date
+                    if (Current_date.isAfter(Due_date)) {
+                        long daysOverdue = ChronoUnit.DAYS.between(Due_date, Current_date);
+                        //append information to file
+                        FileWriter fw = new FileWriter(path, true);
+                        fw.write("\n" + "The book " +  history[2] + " is overdue by " + daysOverdue + " days. The date currently is: " + Current_date + ". Was supposed to be back by: " + Due_date);
+                        Book current_book = new Book(Integer.parseInt(history[1]), history[2], history[3], history[4], Integer.parseInt(history[5]), history[6]);
+                        overdue.add(current_book);
+                        fw.close();
+                    }
+                    myReader.nextLine();//move to next line
+                }
+                myReader.close();
+            // ==========================================================================================
+                
+                return overdue;
+            } 
+            catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+                return null;
+            }catch (IOException e) {
+                System.out.println("An IO error occurred.");
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        public void stop() {
+            scheduler.shutdown();
+        }
+    }
+
+    static class NotificationTaskRunner implements Runnable {
+        @Override
+        public void run() {
+            // Code to send notifications to members with due or overdue books
+            System.out.println("Sent All Notifications...");
+            
+        }
+        public void processOverdueBooks(List<Book> overdue) {
+            try {
+                System.out.println("Please Wait to send notifications...");
+                // Code to send notifications for overdue books
+                overdue = new ArrayList<Book>();
+            
+                // ==================== find overdue books and send to notifications.txt ====================
+            
+                File myObj = new File("src/formative3/Borrowed_Books.txt");
+                Scanner myReader = new Scanner(myObj);
+                BufferedReader br = new BufferedReader(new FileReader(myObj));
+                String path = System.getProperty("user.dir") + "/src/formative3/Notifications.txt";
+                FileWriter clearer = new FileWriter(path, false);
+                clearer.write("");
+                while (myReader.hasNextLine()) {// if the reader has a next line, then the loop continues
+                    String line;
+                    line = br.readLine(); //read the current line
+                    String[] history = line.split(";");//split line into parts to neatly display it after
+                    String Due_date_str = history[4];
+                    LocalDate Due_date = LocalDate.parse(Due_date_str);
+                    LocalDate Current_date = LocalDate.now();
+                    if (Current_date.isAfter(Due_date)) {
+                        long daysOverdue = ChronoUnit.DAYS.between(Due_date, Current_date);
+                        //append information to file
+                        FileWriter fw = new FileWriter(path, true);
+                        fw.write("\n" + history[0] + ";" + history[1] + ";" + history[2] + ";" + history[5] + ";" + daysOverdue);
+                        System.out.println("Please wait while sending notification for overdue book: " + history[2]);
+                        Book current_book = new Book(Integer.parseInt(history[1]), history[2], history[3], history[4], Integer.parseInt(history[5]), history[6]);
+                        overdue.add(current_book);
+                        fw.close();
+                    }
+                    myReader.nextLine();//move to next line
+                }
+                myReader.close();
+            } 
+            catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }catch (IOException e) {
+                System.out.println("An IO error occurred.");
+                e.printStackTrace();
+            }
+        }   
+    }
+    public static class Book {
+    private static int id;
+    private static String title;
+    private static String borrowedDate;
+    private static String returnDate;
+    private static int memberId;
+    private static String memberName;
+
+    // Constructor
+    public Book(int Id, String Title, String BorrowedDate, String ReturnDate, int MemberId, String MemberName) {
+        this.id = Id;
+        this.title = Title;
+        this.borrowedDate = BorrowedDate;
+        this.returnDate = ReturnDate;
+        this.memberId = MemberId;
+        this.memberName = MemberName;
+    }
+    
+    public String getTitle() {
+        return this.title;
+    }
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FORMATIVE 3 CONTINUATION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // --------------- Task 4 ---------------
 }
