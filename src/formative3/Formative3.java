@@ -4,6 +4,7 @@ import java.io.BufferedWriter; // Import buffered reader to write file
 import java.util.*;
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,6 +22,8 @@ import java.util.List;
 // ============================================ START ============================================
 public class Formative3 {
     public static BackgroundTaskRunner backgroundTaskRunner; // initialize outside a void method so I can close it later outside the main method
+    private static final long INITIAL_DELAY_HOURS = 1; // Initialize outside a void method to be used for timer thread.
+    public static TimerThread timer;// initialize outside a void method so I can close it later outside the main method
     public static void main(String[] args) {
         ArrayList<String> Books = new ArrayList<String>();//creating books array
         ArrayList<String> Members = new ArrayList<String>();//creating members array
@@ -38,12 +41,22 @@ public class Formative3 {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        // Create timer to keep track of when the background task will run again.
+        timer = new TimerThread();
+        timer.run();
+
+        // Wait for Thread to finish its processes so the Main Menu Displays correctly and doesn't confuse user.
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // --------------- FORMATIVE 3 Task 2 ---------------
         
         //creating Books Object
         try {
-            File myObj = new File("src/formative3/Books.txt");
-            Scanner myReader = new Scanner(myObj);
+            FileOutputStream myObj = new FileOutputStream("src/formative3/Books.txt");
+            Scanner myReader = new Scanner((Readable) myObj);
         while (myReader.hasNextLine()) {
             String data = myReader.nextLine();
             Books.add(data);
@@ -56,8 +69,8 @@ public class Formative3 {
         }
         //creating Members Object
         try {
-            File myObj = new File("src/formative3/Members.txt");
-            Scanner myReader = new Scanner(myObj);
+            FileOutputStream myObj = new FileOutputStream("src/formative3/Members.txt");
+            Scanner myReader = new Scanner((Readable) myObj);
         while (myReader.hasNextLine()) {
             String data = myReader.nextLine();
             Members.add(data);
@@ -216,6 +229,7 @@ public class Formative3 {
         // ================= Quit Application =================
         } else if (choice.equals("99")) {
             // Stop the background task runner
+            timer.stop();
             backgroundTaskRunner.stop();
             Quit(); //calls quit method
         } else {
@@ -290,7 +304,7 @@ public class Formative3 {
     }
     
     public static void Manage_Notifications() {
-        
+        System.out.println(TimerThread.get_time());
     }
     
     // --------------- FORMATIVE 3 Task 4 --------------- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -345,8 +359,8 @@ public class Formative3 {
             //automatically true
             boolean is_available = true;
             //check how many books exist
-            File myObj = new File("src/formative3/Books.txt");
-            Scanner myReader = new Scanner(myObj);
+            FileOutputStream myObj = new FileOutputStream("src/formative3/Books.txt");
+            Scanner myReader = new Scanner((Readable) myObj);
             int i = 0;
             while (myReader.hasNextLine()) {
                 i++;
@@ -405,8 +419,8 @@ public class Formative3 {
             System.out.println("Enter Gender (Male/Female): ");
             String Gender = user_input.nextLine();
             //check how many books exist
-            File myObj = new File("src/formative3/Members.txt");
-            Scanner myReader = new Scanner(myObj);
+            FileOutputStream myObj = new FileOutputStream("src/formative3/Members.txt");
+            Scanner myReader = new Scanner((Readable) myObj);
             int i = 0;
             while (myReader.hasNextLine()) {
                 i++;
@@ -992,6 +1006,45 @@ public class Formative3 {
             }
         }   
     }
+    
+    static class TimerThread implements Runnable {
+        @Override
+        public void run() {
+            // Schedule BackgroundTaskRunner to run every hour
+            timescheduler.scheduleAtFixedRate(() -> {
+                // Code to examine for due or overdue books and get a list of them
+                // List<Book> overdueBooks = examineForOverdueBooks();
+                System.out.println("BackgroundTaskRunner: Found all Overdue Books.");
+                // Pass the list of overdue books to the notification task runner
+            }, INITIAL_DELAY_HOURS, 1, TimeUnit.HOURS); // Run the task once every hour.
+
+            // Schedule TimerThread to run every second
+            timescheduler.scheduleAtFixedRate(() -> {
+                get_time();
+            }, 0, 1, TimeUnit.SECONDS);
+        }
+        
+        private ScheduledExecutorService timescheduler = Executors.newScheduledThreadPool(2);
+        private static final long INITIAL_DELAY_HOURS = 1;
+        
+        public static String get_time() {
+            long remainingTimeMillis = (INITIAL_DELAY_HOURS * 60 * 60 * 1000) - (System.currentTimeMillis() % (INITIAL_DELAY_HOURS * 60 * 60 * 1000));
+            long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis);
+            long remainingSeconds = TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis - TimeUnit.MINUTES.toMillis(remainingMinutes));
+            return " ================================================================================ \n"
+                    + "Thread: Next notification loop in " + remainingMinutes + " minutes and " + remainingSeconds + " seconds"
+                    + " \n================================================================================ \n";
+
+        }
+        public void stop() {
+            timescheduler.shutdown();
+        }
+        
+        public void getDelay(TimeUnit delay) {
+            
+        }
+    }
+    
     public static class Book {
     private static int id;
     private static String title;
